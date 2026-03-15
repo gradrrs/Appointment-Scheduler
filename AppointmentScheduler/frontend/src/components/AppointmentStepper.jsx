@@ -48,13 +48,11 @@ export default function AppointmentStepper() {
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
-    setSelectedSlot(null); 
-    if (activeStep === 0) handleNext();
+    setSelectedSlot(null);
   };
 
   const handleSlotSelect = (slot) => {
     setSelectedSlot(slot);
-    if (activeStep === 1) handleNext();
   };
 
   const handleContactChange = (valid, data) => {
@@ -76,7 +74,7 @@ export default function AppointmentStepper() {
     setLoading(true);
     try {
       await createAppointment(appointment);
-      setSnackbar({ open: true, message: 'Appointment created! Check your SMS.', severity: 'success' });
+      setSnackbar({ open: true, message: 'Appointment created! We will contact you soon.', severity: 'success' });
       setActiveStep(0);
       setSelectedDate(null);
       setSelectedSlot(null);
@@ -87,6 +85,12 @@ export default function AppointmentStepper() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const canGoToNextStep = () => {
+    if (activeStep === 0) return selectedDate !== null;
+    if (activeStep === 1) return selectedSlot !== null;
+    return true;
   };
 
   return (
@@ -103,8 +107,16 @@ export default function AppointmentStepper() {
               onDateSelect={handleDateSelect}
               disabled={loading}
             />
-            <Box sx={{ mb: 2 }}>
-              <Button disabled onClick={handleBack}>
+            <Box sx={{ mb: 2, mt: 2 }}>
+              <Button 
+                variant="contained" 
+                onClick={handleNext} 
+                disabled={!selectedDate || loading}
+                sx={{ mr: 1 }}
+              >
+                Next
+              </Button>
+              <Button disabled={activeStep === 0} onClick={handleBack}>
                 Back
               </Button>
             </Box>
@@ -139,6 +151,14 @@ export default function AppointmentStepper() {
                   </Box>
                 )}
                 <Box sx={{ mt: 2 }}>
+                  <Button 
+                    variant="contained" 
+                    onClick={handleNext} 
+                    disabled={!selectedSlot || loading}
+                    sx={{ mr: 1 }}
+                  >
+                    Next
+                  </Button>
                   <Button onClick={handleBack}>Back</Button>
                 </Box>
               </Box>
@@ -153,15 +173,15 @@ export default function AppointmentStepper() {
           <StepContent>
             <ContactForm onChange={handleContactChange} />
             <Box sx={{ mt: 2 }}>
-              <Button onClick={handleBack}>Back</Button>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
+              <Button 
+                variant="contained" 
+                onClick={handleSubmit} 
                 disabled={!validContact || loading}
-                sx={{ ml: 1 }}
+                sx={{ mr: 1 }}
               >
                 {loading ? <CircularProgress size={24} /> : 'Confirm'}
               </Button>
+              <Button onClick={handleBack}>Back</Button>
             </Box>
           </StepContent>
         </Step>
@@ -171,7 +191,7 @@ export default function AppointmentStepper() {
         <Paper square elevation={0} sx={{ p: 3 }}>
           <Typography>All steps completed - you're finished</Typography>
           <Button onClick={() => setActiveStep(0)} sx={{ mt: 1, mr: 1 }}>
-            Reset
+            Schedule Another
           </Button>
         </Paper>
       )}
