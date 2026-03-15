@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; 
 import {
   Paper,
   Table,
@@ -13,15 +14,20 @@ import {
   Alert,
   CircularProgress,
   Box,
-  Typography
+  Typography,
+  AppBar,
+  Toolbar
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getAllAppointments, deleteAppointment } from '../api';
 
 export default function Admin() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+  const navigate = useNavigate(); 
 
   const fetchAppointments = async () => {
     setLoading(true);
@@ -58,52 +64,78 @@ export default function Admin() {
   if (loading) return <CircularProgress sx={{ display: 'block', mx: 'auto', mt: 4 }} />;
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Admin Panel</Typography>
-      <Button variant="outlined" onClick={fetchAppointments} sx={{ mb: 2 }}>Refresh</Button>
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            onClick={() => navigate('/')}
+            sx={{ mr: 2 }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Admin Panel
+          </Typography>
+          <Button color="inherit" onClick={() => navigate('/')}>
+            Home
+          </Button>
+        </Toolbar>
+      </AppBar>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Phone</TableCell>
-              <TableCell>Date</TableCell>
-              <TableCell>Time</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {appointments.map((apt) => (
-              <TableRow key={apt.id}>
-                <TableCell>{apt.id}</TableCell>
-                <TableCell>{apt.name}</TableCell>
-                <TableCell>{apt.email}</TableCell>
-                <TableCell>{apt.phone}</TableCell>
-                <TableCell>{apt.date}</TableCell>
-                <TableCell>{formatTime(apt.slot)}</TableCell>
-                <TableCell>
-                  <IconButton color="error" onClick={() => handleDelete(apt.id)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </TableCell>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, p: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Total appointments: {appointments.length}
+        </Typography>
+
+        <Button variant="outlined" onClick={fetchAppointments} sx={{ mb: 2 }}>
+          Refresh
+        </Button>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Phone</TableCell>
+                <TableCell>Date</TableCell>
+                <TableCell>Time</TableCell>
+                <TableCell>Actions</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {appointments.map((apt) => (
+                <TableRow key={apt.id}>
+                  <TableCell>{apt.id}</TableCell>
+                  <TableCell>{apt.name}</TableCell>
+                  <TableCell>{apt.email}</TableCell>
+                  <TableCell>{apt.phone}</TableCell>
+                  <TableCell>{apt.date}</TableCell>
+                  <TableCell>{formatTime(apt.slot)}</TableCell>
+                  <TableCell>
+                    <IconButton color="error" onClick={() => handleDelete(apt.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={4000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
     </Box>
   );
 }
