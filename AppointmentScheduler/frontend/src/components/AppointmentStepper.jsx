@@ -22,7 +22,8 @@ export default function AppointmentStepper() {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-  const [dialogOpen, setDialogOpen] = useState(false); 
+  const [dialogOpen, setDialogOpen] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [contactInfo, setContactInfo] = useState({ firstName: '', lastName: '', email: '', phone: '' });
@@ -34,7 +35,7 @@ export default function AppointmentStepper() {
 
   useEffect(() => {
     if (selectedDate) {
-      const dateStr = selectedDate.toISOString().split('T')[0]; 
+      const dateStr = selectedDate.toISOString().split('T')[0];
       setLoading(true);
       checkAvailability(dateStr)
         .then(data => setBookedSlots(data.bookedSlots))
@@ -61,14 +62,12 @@ export default function AppointmentStepper() {
   };
 
   const handleConfirmClick = () => {
-    if (validContact) {
-      setDialogOpen(true);
-    }
+    if (validContact) setDialogOpen(true);
   };
 
   const handleSubmit = async () => {
     setDialogOpen(false);
-    if (!validContact) return;
+    if (!validContact || !selectedDate || selectedSlot === null) return;
 
     const appointment = {
       date: selectedDate.toISOString().split('T')[0],
@@ -124,14 +123,11 @@ export default function AppointmentStepper() {
         <Step>
           <StepLabel>Select a date</StepLabel>
           <StepContent>
-            <DateTimePicker
-              onDateSelect={handleDateSelect}
-              disabled={loading}
-            />
+            <DateTimePicker onDateSelect={handleDateSelect} disabled={loading} />
             <Box sx={{ mb: 2, mt: 2 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleNext} 
+              <Button
+                variant="contained"
+                onClick={handleNext}
                 disabled={!selectedDate || loading}
                 sx={{ mr: 1 }}
               >
@@ -153,14 +149,15 @@ export default function AppointmentStepper() {
                   <CircularProgress size={24} />
                 ) : (
                   <Box>
-                    {[0,1,2,3,4,5,6,7].map(slot => {
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((slot) => {
                       const hour = 9 + slot;
-                      const timeStr = `${hour}:00 - ${hour+1}:00`;
+                      const timeStr = `${hour}:00 - ${hour + 1}:00`;
                       const isBooked = bookedSlots.includes(slot);
+                      const isSelected = selectedSlot === slot;
                       return (
                         <Button
                           key={slot}
-                          variant={selectedSlot === slot ? 'contained' : 'outlined'}
+                          variant={isSelected ? 'contained' : 'outlined'}
                           disabled={isBooked}
                           onClick={() => handleSlotSelect(slot)}
                           sx={{ m: 0.5 }}
@@ -172,10 +169,10 @@ export default function AppointmentStepper() {
                   </Box>
                 )}
                 <Box sx={{ mt: 2 }}>
-                  <Button 
-                    variant="contained" 
-                    onClick={handleNext} 
-                    disabled={!selectedSlot || loading}
+                  <Button
+                    variant="contained"
+                    onClick={handleNext}
+                    disabled={selectedSlot === null || loading} 
                     sx={{ mr: 1 }}
                   >
                     Next
@@ -194,9 +191,9 @@ export default function AppointmentStepper() {
           <StepContent>
             <ContactForm onChange={handleContactChange} />
             <Box sx={{ mt: 2 }}>
-              <Button 
-                variant="contained" 
-                onClick={handleConfirmClick} 
+              <Button
+                variant="contained"
+                onClick={handleConfirmClick}
                 disabled={!validContact || loading}
                 sx={{ mr: 1 }}
               >
