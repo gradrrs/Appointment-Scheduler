@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Stepper,
   Step,
@@ -22,7 +22,7 @@ export default function AppointmentStepper() {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-
+  const [dialogOpen, setDialogOpen] = useState(false); 
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [contactInfo, setContactInfo] = useState({ firstName: '', lastName: '', email: '', phone: '' });
@@ -60,7 +60,14 @@ export default function AppointmentStepper() {
     setContactInfo(data);
   };
 
+  const handleConfirmClick = () => {
+    if (validContact) {
+      setDialogOpen(true);
+    }
+  };
+
   const handleSubmit = async () => {
+    setDialogOpen(false);
     if (!validContact) return;
 
     const appointment = {
@@ -87,10 +94,18 @@ export default function AppointmentStepper() {
     }
   };
 
-  const canGoToNextStep = () => {
-    if (activeStep === 0) return selectedDate !== null;
-    if (activeStep === 1) return selectedSlot !== null;
-    return true;
+  const getAppointmentForDialog = () => {
+    if (!selectedDate || selectedSlot === null) return null;
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const hour = 9 + selectedSlot;
+    const timeStr = `${hour}:00 - ${hour + 1}:00`;
+    return {
+      name: `${contactInfo.firstName} ${contactInfo.lastName}`.trim() || 'Not provided',
+      date: dateStr,
+      time: timeStr,
+      email: contactInfo.email || 'Not provided',
+      phone: contactInfo.phone || 'Not provided'
+    };
   };
 
   return (
@@ -98,6 +113,12 @@ export default function AppointmentStepper() {
       <Typography variant="h4" gutterBottom>
         Schedule an Appointment
       </Typography>
+
+      <Box sx={{ mb: 2, textAlign: 'right' }}>
+        <Button component={Link} to="/admin" variant="text" size="small">
+          Admin Panel
+        </Button>
+      </Box>
 
       <Stepper activeStep={activeStep} orientation="vertical">
         <Step>
@@ -175,7 +196,7 @@ export default function AppointmentStepper() {
             <Box sx={{ mt: 2 }}>
               <Button 
                 variant="contained" 
-                onClick={handleSubmit} 
+                onClick={handleConfirmClick} 
                 disabled={!validContact || loading}
                 sx={{ mr: 1 }}
               >
@@ -186,6 +207,13 @@ export default function AppointmentStepper() {
           </StepContent>
         </Step>
       </Stepper>
+
+      <ConfirmationDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onConfirm={handleSubmit}
+        appointment={getAppointmentForDialog()}
+      />
 
       {activeStep === 3 && (
         <Paper square elevation={0} sx={{ p: 3 }}>
