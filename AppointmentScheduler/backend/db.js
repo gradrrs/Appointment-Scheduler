@@ -47,3 +47,8 @@ export function deleteAppointmentById(id) {
   const info = stmt.run(id);
   return info.changes > 0;
 }
+
+export function getAppointmentById(id) {
+  const stmt = db.prepare('SELECT * FROM appointments WHERE id = ?');
+  return stmt.get(id);
+}

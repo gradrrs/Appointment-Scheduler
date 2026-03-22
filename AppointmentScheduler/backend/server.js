@@ -10,6 +10,7 @@ import {
   isSlotTaken,
   deleteAppointmentById
 } from './db.js';
+import { getAppointmentById } from './db.js';
 
 dotenv.config();
 
@@ -95,4 +96,14 @@ app.delete('/api/admin/appointments/:id', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
+});
+
+app.get('/api/admin/appointments/:id', (req, res) => {
+  const { id } = req.params;
+  const appointment = getAppointmentById(id);
+  if (appointment) {
+    res.json(appointment);
+  } else {
+    res.status(404).json({ error: 'Appointment not found' });
+  }
 });
