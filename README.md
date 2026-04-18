@@ -19,12 +19,16 @@
 Шаги
 
 1. Клонировать репозиторий
-   git clone https://github.com/your-username/appointment-booking.git
-   cd appointment-booking
-
-2.
-  cd backend
-  npm install
+   git clone git@github.com:gradrrs/Appointment-Scheduler.git (по SSH)
+   cd Appointment-Scheduler
+   cd AppointmentScheduler
 
 3.
-  npm run dev - запускать бек и фронт
+  cd frontend
+  npm install
+  npm run dev
+Другой терминал
+   cd backend
+   npm run dev
+
+
